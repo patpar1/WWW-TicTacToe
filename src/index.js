@@ -22,19 +22,19 @@ if (document.readyState !== "loading") {
 
 function init() {
   console.log("Initializing...");
-  for (let row = 0; row < board_size; row++) {
-    let tr = document.createElement("TR");
+  let boxes = document.getElementsByClassName("col");
+  for (var i = 0; i < boxes.length; i++) {
+    var box = boxes[i];
+    box.addEventListener("click", event => {
+      makeMove(event.target);
+      event.stopPropagation();
+    });
+  }
+  for (var x = 0; x < board_size; x++) {
     board.push([]);
-    for (let col = 0; col < board_size; col++) {
-      let td = document.createElement("TD");
-      td.addEventListener("click", event => {
-        makeMove(event.target);
-        event.stopPropagation();
-      });
-      tr.appendChild(td);
-      board[row].push(td);
+    for (var j = 0; j < board_size; j++) {
+      board[x].push("");
     }
-    document.getElementById("board").appendChild(tr);
   }
   console.log("Board initialized!");
   start_game();
@@ -46,10 +46,7 @@ function start_game() {
 }
 
 function equals(array) {
-  return (
-    array[0].innerHTML !== "" &&
-    array.every(x => x.innerHTML === array[0].innerHTML)
-  );
+  return array[0] !== "" && array.every(x => x === array[0]);
 }
 
 function checkWin() {
@@ -84,8 +81,7 @@ function frame() {
     reset_timer();
   } else {
     time--;
-    bar.style.width = 32 * time + "px";
-    bar.innerHTML = time + "s";
+    bar.style = "width: " + 10 * time + "%";
   }
 }
 
@@ -93,13 +89,7 @@ function reset_timer() {
   clearInterval(id);
   time = 10;
   id = setInterval(frame, 1000);
-  bar.style.width = "320px";
-  bar.innerHTML = "10s";
-  if (player1Turn) {
-    bar.className = "firstplayer";
-  } else {
-    bar.className = "secondplayer";
-  }
+  bar.style = "width: 100%";
 }
 
 function makeMove(e) {
@@ -107,7 +97,11 @@ function makeMove(e) {
     return;
   }
   e.innerHTML = player1Turn ? players[0] : players[1];
-  e.className = player1Turn ? "firstplayer" : "secondplayer";
+  var id = e.id;
+  board[Math.floor(id / board_size)][id % board_size] = player1Turn
+    ? players[0]
+    : players[1];
+  e.className = "col s1 " + (player1Turn ? "firstplayer" : "secondplayer");
   moves++;
   if (checkWin()) {
     alert("Player " + (player1Turn ? "1" : "2") + " won!");
