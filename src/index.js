@@ -6,9 +6,6 @@ const board = [];
 
 let player1Turn = true;
 let moves = 0;
-let time = 10;
-let bar = null;
-let id = null;
 
 if (document.readyState !== "loading") {
   console.log("Document ready, executing");
@@ -22,31 +19,32 @@ if (document.readyState !== "loading") {
 
 function init() {
   console.log("Initializing...");
-  let boxes = document.getElementsByClassName("col");
-  for (var i = 0; i < boxes.length; i++) {
-    var box = boxes[i];
-    box.addEventListener("click", event => {
-      makeMove(event.target);
-      event.stopPropagation();
-    });
-  }
-  for (var x = 0; x < board_size; x++) {
+  for (var row = 0; row < board_size; row++) {
+    var tr = document.createElement("TR");
     board.push([]);
-    for (var j = 0; j < board_size; j++) {
-      board[x].push("");
+    for (var col = 0; col < board_size; col++) {
+      var td = document.createElement("TD");
+      td.setAttribute("height", 60);
+      td.setAttribute("width", 60);
+      td.setAttribute("align", "center");
+      td.setAttribute("valign", "center");
+      td.addEventListener("click", event => {
+        makeMove(event.target);
+        event.stopPropagation();
+      });
+      tr.appendChild(td);
+      board[row].push(td);
     }
+    document.getElementById("board").appendChild(tr);
   }
   console.log("Board initialized!");
-  start_game();
-}
-
-function start_game() {
-  bar = document.getElementById("progress_bar");
-  id = setInterval(frame, 1000);
 }
 
 function equals(array) {
-  return array[0] !== "" && array.every(x => x === array[0]);
+  return (
+    array[0].innerHTML !== "" &&
+    array.every(x => x.innerHTML === array[0].innerHTML)
+  );
 }
 
 function checkWin() {
@@ -75,42 +73,17 @@ function checkWin() {
   return false;
 }
 
-function frame() {
-  if (time === 0) {
-    player1Turn = !player1Turn;
-    reset_timer();
-  } else {
-    time--;
-    bar.style = "width: " + 10 * time + "%";
-  }
-}
-
-function reset_timer() {
-  clearInterval(id);
-  time = 10;
-  id = setInterval(frame, 1000);
-  bar.style = "width: 100%";
-}
-
 function makeMove(e) {
   if (e.innerHTML !== "") {
     return;
   }
   e.innerHTML = player1Turn ? players[0] : players[1];
-  var id = e.id;
-  board[Math.floor(id / board_size)][id % board_size] = player1Turn
-    ? players[0]
-    : players[1];
-  e.className = "col s1 " + (player1Turn ? "firstplayer" : "secondplayer");
   moves++;
   if (checkWin()) {
     alert("Player " + (player1Turn ? "1" : "2") + " won!");
-    clearInterval(id);
   } else if (moves === board_size * board_size) {
     alert("Draw!");
-    clearInterval(id);
   } else {
     player1Turn = !player1Turn;
-    reset_timer();
   }
 }
